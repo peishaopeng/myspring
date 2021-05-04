@@ -1,9 +1,6 @@
 package xyz.xcxo.myspring;
 
-import sun.jvm.hotspot.types.Field;
-
 import java.io.File;
-import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,10 +19,11 @@ public class MySpringApplicationContext {
      * 单例池
      */
     private ConcurrentHashMap<String, Object> singletonObjects = new ConcurrentHashMap<>();
+
     /**
      * 扫描到的所有的Bean定义
      */
-    private ConcurrentHashMap<String, BeanDefine> beanDefinitionMap = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
 
     public MySpringApplicationContext(Class configClass) {
         this.configClass = configClass;
@@ -34,6 +32,8 @@ public class MySpringApplicationContext {
         scan(configClass);
 
     }
+
+
 
     // 扫描
     private void scan(Class configClass){
@@ -67,17 +67,17 @@ public class MySpringApplicationContext {
                             Component declaredAnnotation = aClass.getDeclaredAnnotation(Component.class);
                             String beanName = declaredAnnotation.value();
 
-                            BeanDefine beanDefine = new BeanDefine();
+                            BeanDefinition beanDefinition = new BeanDefinition();
                             // Bean 的作用域
                             if (aClass.isAnnotationPresent(Scope.class)) {
                                 Scope scopeAnnotation = aClass.getDeclaredAnnotation(Scope.class);
-                                beanDefine.setScope(scopeAnnotation.value());
+                                beanDefinition.setScope(scopeAnnotation.value());
                             } else {
                                 // 没有定义作用域时，默认时单例
-                                beanDefine.setScope("singleton");
+                                beanDefinition.setScope("singleton");
                             }
                             // TODO 暂时不考虑beanName重复及未定义beanName的情况
-                            beanDefinitionMap.put(beanName, beanDefine);
+                            beanDefinitionMap.put(beanName, beanDefinition);
                         }
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
@@ -94,8 +94,8 @@ public class MySpringApplicationContext {
             // 抛出Bean不存在的异常，这里用NullPointerException代替一下子 😁
             throw new NullPointerException();
         }
-        BeanDefine beanDefine = beanDefinitionMap.get(beanName);
-        if (beanDefine.getScope().equals("singleton")){
+        BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+        if (beanDefinition.getScope().equals("singleton")){
             //单例bean从单例池中获取
             return singletonObjects.get(beanName);
         } else {

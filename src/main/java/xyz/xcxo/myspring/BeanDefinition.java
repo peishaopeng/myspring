@@ -7,7 +7,7 @@ package xyz.xcxo.myspring;
  * @Description Bean 定义
  * @data 2021/5/5 1:58 上午
  */
-public class BeanDefine {
+public class BeanDefinition {
 
     /**
      * Bean 类型
