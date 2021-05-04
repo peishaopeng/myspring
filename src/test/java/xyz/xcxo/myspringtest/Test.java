@@ -12,5 +12,8 @@ import xyz.xcxo.myspring.MySpringApplicationContext;
 public class Test {
     public static void main(String[] args) {
         MySpringApplicationContext mySpringApplicationContext = new MySpringApplicationContext(AppConfig.class);
+
+        System.out.println(mySpringApplicationContext.getBean("userService"));
+        System.out.println(mySpringApplicationContext.getBean("userService"));
     }
 }

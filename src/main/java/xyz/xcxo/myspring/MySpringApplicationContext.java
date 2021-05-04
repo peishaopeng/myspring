@@ -1,7 +1,11 @@
 package xyz.xcxo.myspring;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -31,8 +35,34 @@ public class MySpringApplicationContext {
         //ComponentScan注解 --> 扫描路径 --> 扫描 --> BeanDefinition --> BeanMap
         scan(configClass);
 
+        // 创建单例Bean
+        for (Map.Entry<String, BeanDefinition> entry : beanDefinitionMap.entrySet()) {
+            String beanName = entry.getKey();
+            BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+
+            // 创建好的单例Bean
+            Object bean = createBean(beanDefinition);
+            // 放到单例池
+            singletonObjects.put(beanName, bean);
+        }
     }
 
+    private Object createBean(BeanDefinition beanDefinition){
+        Class clazz = beanDefinition.getClazz();
+        try {
+            Object instance = clazz.getDeclaredConstructor().newInstance();
+            return instance;
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 
     // 扫描
@@ -68,6 +98,7 @@ public class MySpringApplicationContext {
                             String beanName = declaredAnnotation.value();
 
                             BeanDefinition beanDefinition = new BeanDefinition();
+                            beanDefinition.setClazz(aClass);
                             // Bean 的作用域
                             if (aClass.isAnnotationPresent(Scope.class)) {
                                 Scope scopeAnnotation = aClass.getDeclaredAnnotation(Scope.class);
@@ -100,9 +131,8 @@ public class MySpringApplicationContext {
             return singletonObjects.get(beanName);
         } else {
             // 原型Bean，创建Bean对象
-
+            return createBean(beanDefinition);
         }
-        return null;
     }
 
 }
